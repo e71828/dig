@@ -1,0 +1,91 @@
+%! Package = nputhesis
+%! Author = e71828
+%! Date = 2022/4/11
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{nputhesis}[2021/4/11 e71828's Package]
+%-
+%-> Cover items
+%-
+\RequirePackage{xeCJK}%
+%\RequirePackage{graphicx}% packages for including graphics
+%\RequirePackage[normalem]{ulem} % ulem is needed to support strikethroughs (\sout)
+
+\setCJKmainfont{SimSun}[AutoFakeBold=2.5, ItalicFont=KaiTi, BoldItalicFont=LiSu]%
+\setCJKsansfont{SimHei}[AutoFakeBold=2.5]%
+\setCJKmonofont{FangSong}%
+
+\def\npu@value@ch@subject{数据挖掘技术及其应用}
+\newcommand{\subject}[1]{\def\npu@value@ch@subject{#1}}
+
+\def\npu@value@ch@id@student{2021200000}
+\newcommand{\studentID}[1]{\def\npu@value@ch@id@student{#1}}
+
+
+\renewcommand{\today}{\number\year 年 \number\month 月 \number\day 日}
+\def\npu@value@ch@date{\today}
+\renewcommand{\date}[1]{\def\npu@value@ch@date{#1}}
+
+\def\npu@value@ch@author{乙二醇}
+\renewcommand{\author}[1]{\def\npu@value@ch@author{#1}}
+
+\def\npu@value@ch@advisor{闫永胜}
+\newcommand{\advisor}[1]{\def\npu@value@ch@advisor{#1}}
+
+\newcommand{\npu@value@ch@institute}{西北工业大学研究生院}
+\newcommand{\institute}[1]{\def\npu@value@ch@institute{#1}}
+
+\newcommand{\ulhshift}{0em}% horizontal shift on underline
+\newcommand{\ulextend}[2][250pt]{% extend underline length
+    \hbox to #1{\hfill\hspace*{\ulhshift}#2\hfill}}
+
+\newcommand{\ulunify}[1]{\uline{#1}}% unified name
+\newcommand{\ulenhance}[2][1pt]{% enhanced underline
+    \def\ULthickness{#1}% set thickness
+    \setlength{\ULdepth}{0.5em}% set depth
+    \expandafter\ulunify\expandafter{#2}% linebreak fix
+}
+\renewcommand{\maketitle}{%
+    \thispagestyle{empty}
+    {
+    \begin{center}
+        \fontsize{16}{18}\selectfont
+        \vspace*{\stretch{9}}
+
+        \usebox{\bluelogo}
+
+        \vspace*{\stretch{3}}
+
+        {\fontsize{24}{24}\selectfont \bfseries {研究生专业课程考试答题册}}
+
+        \vspace*{\stretch{5}}
+
+        \fbox{\parbox[c][4em][c]{7em}{\par 得分: \par}}
+
+        \vspace*{\stretch{5}}
+
+        \def\tabcolsep{1pt}
+        \def\arraystretch{1.8}
+        \begin{tabular}{lc}
+            学\qquad 号: & \ulenhance[0.8pt]{\ulextend{\npu@value@ch@id@student}}\\
+            姓\qquad 名: & \ulenhance[0.8pt]{\ulextend{\npu@value@ch@author}}\\
+            考试课程: & \ulenhance[0.8pt]{\ulextend{\npu@value@ch@subject}}\\
+            考试日期: & \ulenhance[0.8pt]{\ulextend{\npu@value@ch@date}}\\
+            授课教师: & \ulenhance[0.8pt]{\ulextend{\npu@value@ch@advisor}}
+        \end{tabular}
+
+        \vspace*{\stretch{7}}
+        {\fontsize{14}{14}\selectfont\bfseries\itshape{\npu@value@ch@institute}}
+        \vspace*{\stretch{1}}
+    \end{center}
+    }
+    \clearpage
+}
+
+\newsavebox{\bluelogo}
+\sbox{\bluelogo}{%
+    \parbox{0.8\textwidth}{%
+    \raisebox{-0.5\height}{\includegraphics[height=30mm]{logo_blue.pdf}}%
+    \hspace*{10pt}%
+    \raisebox{-0.5\height}{\includegraphics[height=25mm]{text_blue.pdf}}%
+}}
