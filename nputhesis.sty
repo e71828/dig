@@ -4,6 +4,8 @@
 
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesPackage{nputhesis}[2021/4/11 e71828's Package]
+\RequirePackage{etoolbox}% a toolbox of programming facilities
+\newcommand{\artxifstreq}{\expandafter\ifstrequal\expandafter}% expansion control
 %-
 %-> Cover items
 %-
@@ -89,3 +91,51 @@
     \hspace*{10pt}%
     \raisebox{-0.5\height}{\includegraphics[height=25mm]{text_blue.pdf}}%
 }}
+%-
+%-> Detect class and counter
+%-
+\newcommand*{\artxifcnt}[1]{% check if counter exists
+    \ifcsname c@#1\endcsname%
+        \expandafter\@firstoftwo%
+    \else%
+        \expandafter\@secondoftwo%
+    \fi
+}
+\artxifcnt{chapter}{\def\artxmaincnt{chapter}}{\def\artxmaincnt{section}}%
+%-
+%-> Macro for adding link to toc and bookmark
+%-
+\newcommand{\intobmknostar}[4][0]{% [<level>,<\chapter|...>,<*>,<title>] [example: \intobmk\chapter*{Abstract}]
+    \edef\artxmark{\expandafter\@gobble\string#2}% get the string 'cmd' after '\' in a command '\cmd'
+    #2#3{% excute command
+        \phantomsection% create bookmark link
+        \Hy@writebookmark% write bookmark
+        {}%
+        {#4}%
+        {\@currentHref}%
+        {#1}%
+        {toc}%
+        #4%
+    }%
+    \artxifstreq{\artxmark}{chapter}{%
+        \markboth{\MakeUppercase{#4}}{}% set left mark
+    }{%
+        \markright{\MakeUppercase{#4}}% set right mark
+    }
+}
+\newcommand{\intobmkstar}[3][0]{% [<level>,<extra commands>,<title>] [example: \intobmk*{\cleardoublepage}{\contentsname}]
+    #2% excute command
+    \phantomsection% create bookmark link
+    \Hy@writebookmark% write bookmark
+    {}%
+    {#3}%
+    {\@currentHref}%
+    {#1}%
+    {toc}%
+    \artxifstreq{#1}{0}{%
+        \markboth{\MakeUppercase{#3}}{}% set left mark
+    }{%
+        \markright{\MakeUppercase{#3}}% set right mark
+    }
+}
+\newcommand{\intobmk}{\@ifstar{\intobmkstar}{\intobmknostar}}% swap starred and non-starred versions
