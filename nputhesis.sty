@@ -7,6 +7,63 @@
 \RequirePackage{etoolbox}% a toolbox of programming facilities
 \newcommand{\artxifstreq}{\expandafter\ifstrequal\expandafter}% expansion control
 %-
+%-> Bibliography engine <bibtex>, <biber>
+%-
+\newif\ifartx@bibtex \artx@bibtextrue
+\newif\ifartx@biber \artx@biberfalse
+\def\artxbib{bibtex}
+\DeclareOption{bibtex}{%
+    \artx@bibtextrue
+    \artx@biberfalse
+    \def\artxbib{bibtex}
+}
+\DeclareOption{biber}{%
+    \artx@bibtexfalse
+    \artx@bibertrue
+    \def\artxbib{biber}
+}
+%-
+%-> Citation and reference style
+%-
+\newif\ifartx@numbers \artx@numberstrue
+\newif\ifartx@super \artx@superfalse
+\newif\ifartx@authoryear \artx@authoryearfalse
+\newif\ifartx@alpha \artx@alphafalse
+\DeclareOption{numbers}{%
+    \artx@numberstrue
+    \artx@superfalse
+    \artx@authoryearfalse
+    \artx@alphafalse
+}
+\DeclareOption{super}{%
+    \artx@numberstrue
+    \artx@supertrue
+    \artx@authoryearfalse
+    \artx@alphafalse
+}
+\DeclareOption{authoryear}{%
+    \artx@numbersfalse
+    \artx@superfalse
+    \artx@authoryeartrue
+    \artx@alphafalse
+}
+\DeclareOption{alpha}{%
+    \artx@numbersfalse
+    \artx@superfalse
+    \artx@authoryearfalse
+    \artx@alphatrue
+}
+%-
+%-> Handle non-implemented options
+%-
+\DeclareOption*{%
+    \PackageWarning{artratex}{Unknown option '\CurrentOption'}%
+}
+%-
+%-> Terminates all options processing
+%-
+\ProcessOptions\relax%
+%-
 %-> Cover items
 %-
 \RequirePackage{xeCJK}%
@@ -139,3 +196,77 @@
     }
 }
 \newcommand{\intobmk}{\@ifstar{\intobmkstar}{\intobmknostar}}% swap starred and non-starred versions
+%-
+%-> Bibliography processor and package
+%-
+\def\artxbibref{ref.bib}% bibliography reference file
+\def\artxbibtexnum{Biblio/gbt7714-numerical}% bibtex numbers bst
+\def\artxbibtexauy{Biblio/gbt7714-author-year}% bibtex authoryear bst
+\def\artxbibtexalp{alpha}% bibtex alpha bst
+\def\artxbibernum{Biblio/gb7714-2015}% biber numbers bst
+\def\artxbiberauy{Biblio/gb7714-2015ay}% biber authoryear bst
+\def\artxbiberalp{alphabetic}% biber alpha bst
+%- Bibtex processor + natbib package
+\ifartx@bibtex%
+    % Set punctuation and mode of citation style
+    \newcommand{\bibstyle@super}{\bibpunct{[}{]}{,}{s}{,}{\textsuperscript{,}}}%
+    \newcommand{\bibstyle@numbers}{\bibpunct{[}{]}{,}{n}{,}{,}}%
+    \newcommand{\bibstyle@authoryear}{\bibpunct{(}{)}{;}{a}{,}{,}}%
+    \newcommand{\bibstyle@alpha}{\bibpunct{[}{]}{,}{n}{,}{,}}%
+    \ifartx@numbers% enable numbered citation style
+        \RequirePackage[sort&compress]{natbib}% numbered citation mode
+        \ifartx@super% enable superscripted citation style
+            \citestyle{super}%
+        \else
+            \citestyle{numbers}%
+        \fi
+        \bibliographystyle{\artxbibtexnum}% numbered scheme
+    \fi
+    \ifartx@authoryear% enable author year citation style
+        \RequirePackage{natbib}% author year citation mode
+        \citestyle{authoryear}%
+        \bibliographystyle{\artxbibtexauy}% author year scheme
+    \fi
+    \ifartx@alpha% enable alpha citation style
+        \RequirePackage[square,comma,numbers]{natbib}% alpha citation mode
+        \bibliographystyle{\artxbibtexalp}% alpha scheme
+    \fi
+    \providecommand*{\citetns}[2][]{% text embedded \citet in superscripted mode
+        \begingroup\citestyle{numbers}\citet[#1]{#2}\endgroup%
+    }
+    \providecommand*{\citepns}[2][]{% text embedded \citep in superscripted mode
+        \begingroup\citestyle{numbers}\citep[#1]{#2}\endgroup%
+    }
+\fi
+%- Biber processor + biblatex package
+\ifartx@biber%
+    \AtEndPreamble{\RequirePackage{hyperref}}% enable biblatex detection of hyperref
+    \ifartx@numbers% enable numbered citation style
+        \ifartx@super% enable superscripted citation style
+            \RequirePackage[backend=biber,style=\artxbibernum,mincitenames=1,maxcitenames=2]{biblatex}%
+        \else
+            \RequirePackage[backend=biber,style=\artxbibernum,mincitenames=1,maxcitenames=2]{biblatex}%
+            \renewrobustcmd*{\citet}{\textcite}%
+            \renewrobustcmd*{\citep}{\parencite}%
+        \fi
+    \fi
+    \ifartx@authoryear% enable author year citation style
+        \RequirePackage[backend=biber,style=\artxbiberauy,mincitenames=1,maxcitenames=2]{biblatex}%
+            \renewrobustcmd*{\citet}{\textcite}%
+            \renewrobustcmd*{\citep}{\parencite}%
+    \fi
+    \ifartx@alpha% enable alpha citation style
+        \RequirePackage[backend=biber,style=\artxbiberalp]{biblatex}%
+    \fi
+    \addbibresource{\artxbibref}%
+    \providecommand{\citep}[1]{\parencite{#1}}% compatibility
+    \providecommand{\citet}[1]{\textcite{#1}}% compatibility
+    \providecommand{\bibetal}{et al.}% compatibility
+    \providecommand{\biband}{and}% compatibility
+    \DefineBibliographyStrings{english}{%
+        andincite         = {\biband},
+        andothersincite   = {\bibetal{}},
+        andincitecn       = {\biband},
+        andothersincitecn = {\bibetal},
+    }
+\fi
